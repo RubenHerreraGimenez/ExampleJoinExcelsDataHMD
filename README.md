@@ -9,3 +9,8 @@ In total we have more than a million rows in 100 files (50 for exposure and 50 f
 This document proposes a quick solution using R.This code would be used for any type of data arranged in Excel.
 
 **Link to data repository and code for easy reproducibility:** 
+https://github.com/RubenHerreraGimenez/ExampleJoinExcelsDataHMD
+
+
+**Link to the explanatory html of the process:** 
+https://rubenherreragimenez.github.io/ExampleJoinExcelsDataHMD/
