@@ -1,0 +1,158 @@
+---
+title: |
+  <b><div style="text-align: center"> Database creation from Excel files. A practical case: Human Mortality Database. </div></b>
+author:   | 
+ <div style="text-align: center"> Rubén Herrera </div>
+mail:     |
+ <div style="text-align: center"> rubenherreragimenez@gmail.com </div>
+date:     |
+ <div style="text-align: center"> April 2021</div>
+license:  by-nc-sa
+urlcolor: blue
+output:
+  html_document: 
+    theme:        cosmo 
+    highlight:    tango 
+    toc:          TRUE
+    toc_float:    TRUE
+    code_folding: show
+    includes:
+    after_body:   footer.html
+  pdf_document:   default
+  epuRate::epurate:
+    number_sections: FALSE
+    code_folding:    "show"
+    toc:          TRUE 
+    word_document:  default
+  rmdformats::readthedown:
+    toc:          TRUE 
+    toc_float:    TRUE     
+---
+
+# **Introduction**
+
+In this example, we start from 100 Excel databases with exposure and death data from different countries and regions.
+
+The objective is to be able to work with all the information to undertake different analyzes. Therefore it is necessary to gather all the information in a single database.
+
+In total we have more than a million rows in 100 files (50 for exposure and 50 for deaths). These dimensions make it inadvisable to do it by hand, which requires automation.
+
+This document proposes a quick solution using R.This code would be used for any type of data arranged in Excel.
+
+# **Packages and options**
+
+We carry out the loading of packages with a function that installs and loads them in case of not having them in our R.
+
+```{r message = FALSE, warning=FALSE}
+
+enable_packages <- function(x){
+  for( i in x ){
+    if( ! require( i , character.only = TRUE ) ){
+      install.packages( i , dependencies = TRUE )
+      require( i , character.only = TRUE )
+    }
+  }
+}
+
+enable_packages(c("data.table","tidyverse", "tictoc", "readxl", "writexl", "stringr", "knitr"))
+
+options(scipen = 999)
+
+```
+
+
+# **Path compilation**
+
+With the *list.files* function we include the path of the folder where the excel files are. We collect both the full path of each file and each of the names.
+
+Below we see the image of how the folder looks on the PC, how the structure of the first excel file looks like and the first observations of the objects created.
+
+![](Inputs\Img1.PNG){width=300px, height=400px}
+
+![](Inputs\Img2.PNG){width=700px, height=600px}
+
+```{r message = FALSE, warning=FALSE}
+
+pathList <- list.files("Inputs/", pattern = "xlsx", full.names = TRUE)
+
+head(pathList, 5)
+
+namesList <- list.files("Inputs/", pattern = "xlsx", full.names = FALSE)
+
+head(namesList, 5)
+
+```
+
+# **Function to load and adapt data and list of data sets**
+
+We create a function with the full path and file name as inputs. This function loads the database of each excel and adds a column with the type of series (exposure or deceased) and another with the country.
+
+With the *apply* function we apply this function with each of the complete paths and names collected in the previous step.
+
+Thus, a list is obtained with each of the excel databases, with two additional columns (type of serie and country).
+
+We see the first rows of the first data set in the list.
+
+```{r message = FALSE, warning=FALSE}
+
+tic()
+
+readAddSerieCountry <- function(path, name){
+  df<-read_xlsx(path, col_types = c("numeric", "numeric", "numeric", "numeric", "numeric", "logical"))
+  df$serie <- factor(str_split(str_remove(name,".xlsx"),"_")[[1]][1])
+  df$country <- factor(str_split(str_remove(name,".xlsx"),"_")[[1]][2])
+  
+  return(df)
+}
+
+listDf <- lapply(1:length(pathList), function(i){readAddSerieCountry(pathList[[i]],namesList[[i]])})
+
+listDf[[1]] %>% head(10) %>% kable()
+
+
+```
+
+# **Union of the data sets of the list in a single database**
+
+We use the *bind_rows* function to join all the dataframes into one, since they have the same number of columns.
+
+We show the first and last rows of the final result.
+
+```{r message = FALSE, warning=FALSE}
+
+totalDf <- bind_rows(listDf)
+
+totalDf %>% head(20) %>% kable()
+totalDf %>% tail(20) %>% kable()
+
+dim(totalDf)
+
+```
+
+We have gone from 100 excel files to an operational database that has great potential to undertake many analyzes.
+
+The above process without conforming the html file takes about 10 seconds:
+
+![](Inputs\Img3.PNG){width=500px, height=400px}
+
+# **Final export**
+
+If we wanted to save this database in a csv file, we would do it as follows.
+
+```{r message = FALSE, warning=FALSE}
+
+fwrite(totalDf, "Outputs/total_db.csv")
+
+```
+
+![](Inputs\Img4.PNG){width=700px, height=600px}
+
+# **Session information**
+
+```{r message = FALSE, warning=FALSE}
+
+sessionInfo()
+
+```
+
+<span style="color:black; font-size:25px"> **I HOPE IT HELPS!** </span>
