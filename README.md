@@ -7,3 +7,5 @@ The objective is to be able to work with all the information to undertake differ
 In total we have more than a million rows in 100 files (50 for exposure and 50 for deaths). These dimensions make it inadvisable to do it by hand, which requires automation.
 
 This document proposes a quick solution using R.This code would be used for any type of data arranged in Excel.
+
+**Link to data repository and code for easy reproducibility:** 
