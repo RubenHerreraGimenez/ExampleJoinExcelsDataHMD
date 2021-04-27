@@ -1,4 +1,4 @@
-# Database creation from Excel files. A practical case: Human Mortality Database.
+# Database creation from Excel files. A practical case: Human Mortality Database. 1 million rows, 100 Excel files, 10 seconds.
 
 In this example, we start from 100 Excel databases with exposure and death data from different countries and regions.
 
